@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "services": {
+    "notifier": {
+      "command": "python -u notifier.py",
+      "volumes": [
+        { "name": "notifier-state", "destinationPath": "/data" }
+      ]
+    }
+  }
+}

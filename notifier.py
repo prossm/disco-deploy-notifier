@@ -108,10 +108,18 @@ def _first(d, *keys):
 
 
 def extract_deployment(data):
-    """Pull the fields we care about out of a deployment_status payload,
-    tolerant of unknown/nested shapes (the schema is not documented)."""
-    dep = data.get("deployment") if isinstance(data.get("deployment"), dict) else data
-    project = _first(dep, "project", "projectName", "project_name") or data.get("project")
+    """Pull the fields we care about out of a deployment:status payload,
+    tolerant of unknown/nested shapes (the schema is not documented).
+
+    Observed shape from the daemon:
+      {"type": "deployment:status",
+       "data": {"project": {"name": "heritable"},
+                "deployment": {"number": 488, "status": "COMPLETE"}}}
+    """
+    # The real payload wraps everything under a top-level "data" envelope.
+    inner = data.get("data") if isinstance(data.get("data"), dict) else data
+    dep = inner.get("deployment") if isinstance(inner.get("deployment"), dict) else inner
+    project = _first(inner, "project", "projectName", "project_name") or _first(dep, "project")
     # `project` may be a nested object ({"name": ...}) — normalize to its name.
     if isinstance(project, dict):
         project = project.get("name")
@@ -130,7 +138,14 @@ def handle_event(event_type, raw_data, event_id):
     if event_id:
         write_last_event_id(event_id)
 
-    if event_type and event_type != "deployment_status":
+    # Log raw events *before* any filtering so debugging shows everything the
+    # stream sends, including event types we'd otherwise drop.
+    if os.environ.get("DEBUG_EVENTS"):
+        log.info("event=%s id=%s data=%s", event_type, event_id, raw_data)
+
+    # We only care about deployment status transitions. The daemon also emits
+    # `deployment:created` and heartbeat comments, which we ignore.
+    if event_type and event_type != "deployment:status":
         return
 
     try:
@@ -138,9 +153,6 @@ def handle_event(event_type, raw_data, event_id):
     except json.JSONDecodeError:
         log.debug("Skipping non-JSON event data: %s", raw_data)
         return
-
-    if os.environ.get("DEBUG_EVENTS"):
-        log.info("event=%s id=%s data=%s", event_type, event_id, raw_data)
 
     dep = extract_deployment(data)
     status = dep["status"]

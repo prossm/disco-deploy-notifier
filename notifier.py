@@ -113,7 +113,7 @@ def extract_deployment(data):
 
     Observed shape from the daemon:
       {"type": "deployment:status",
-       "data": {"project": {"name": "heritable"},
+       "data": {"project": {"name": "my-app"},
                 "deployment": {"number": 488, "status": "COMPLETE"}}}
     """
     # The real payload wraps everything under a top-level "data" envelope.

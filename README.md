@@ -22,7 +22,7 @@ is built around those constraints:
 - Dedupes by deployment so buffer replay doesn't double-post.
 - Accepts that a **daemon** restart can drop events — best-effort, not guaranteed.
 
-It runs as its **own** Disco project (not a service inside family-archive) so it
+It runs as its **own** Disco project (not a service inside the app it watches) so it
 isn't torn down and restarted every time the app it's watching deploys.
 
 ## Setup
@@ -55,7 +55,7 @@ disco env:set --project disco-deploy-notifier \
   DISCO_EVENTS_URL=https://your-disco-host/api/disco/events \
   DISCO_API_KEY=xxxxxxxxxxxxxxxx \
   SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ \
-  DISCO_PROJECT_FILTER=family-archive
+  DISCO_PROJECT_FILTER=my-app
 ```
 
 `DISCO_PROJECT_FILTER` matters: the daemon streams events for **every** project

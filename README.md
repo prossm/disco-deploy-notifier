@@ -1,5 +1,7 @@
 # disco-deploy-notifier
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A tiny always-on service that listens to the [Disco](https://letsdisco.dev)
 daemon's deployment event stream and posts to a Slack channel whenever a
 deployment **completes** or **fails**.
@@ -88,3 +90,7 @@ python -u notifier.py
   need a field tweak if Disco changes payloads. `DEBUG_EVENTS=1` shows the raw shape.
 - Upstream feature request for real webhooks is the long-term fix — see the
   Disco daemon GitHub issues.
+
+## License
+
+[MIT](LICENSE)
